@@ -6,110 +6,115 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Sidebar } from "@/components/sidebar"
 import api from "@/api/api"
-import { ProfessorDialog } from "./professor-dialog"
+import { SalaDialog } from "./sala-dialog"
 
-export interface Professor {
-    id?: number;
+export interface Sala {
+    id?: number,
     nome: string,
-    email: string,
-    telefone: string,
-    departamento: string,
-    ativo: boolean,
+    capacidade: number | null,
+    tipo: string,
+    ativo: boolean
 }
 
-export default function Professores() {
+export default function Salas() {
   const [dialogAberto, setDialogAberto] = useState(false)
-  const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null)
-  const [professores, setProfessores] = useState<Professor[]>([])
+  const [salaSelecionado, setSalaSelecionado] = useState<Sala | null>(null)
+  const [salas, setSalas] = useState<Sala[]>([])
   const [termoBusca, setTermoBusca] = useState("")
   const [mostrarInativos, setMostrarInativos] = useState(false)
 
-  const professoresFiltrados = professores
+  const salasFiltrados = salas
   .filter((prof) =>
     prof.nome.toLowerCase().includes(termoBusca.toLowerCase()) &&
     prof.ativo === !mostrarInativos
   )
 
-  const fecthProfessores = async  () => {
-    const response = await api.get('/professores');
-    if(response) {
-      setProfessores(response.data);
+  const fecthSalas = async () => {
+    try {
+        const response = await api.get('/salas');
+        setSalas(response.data);
+    } catch(error: any) {
+        if (error.response) {
+            alert(`Erro: ${error.response.data.message}`)
+        } else {
+            alert('Erro inesperado ')
+        }
     }
   }
 
   useEffect(() => {
-    fecthProfessores();
+    fecthSalas();
   }, [])
 
   const abrirDialogAdicionar = () => {
-    setProfessorSelecionado(null)
+    setSalaSelecionado(null)
     setDialogAberto(true)
   }
   
   const abrirDialogEditar = (id: number) => {
-    const professor = professores.find((p) => p.id === id)
-    if (professor) {
-      setProfessorSelecionado(professor)
+    const sala = salas.find((p) => p.id === id)
+    if (sala) {
+      setSalaSelecionado(sala)
       setDialogAberto(true)
     }
   }
   
-  const salvarProfessor = async (prof: Professor) => {
+  const salvarSala = async (prof: Sala) => {
     if (prof.id) {
       try {
-        const response = await api.put(`/professores/${prof.id}`, { ...prof })
+        const response = await api.put(`/salas/${prof.id}`, { ...prof })
   
         if (response.status === 204) {
-          alert('Professor foi alterado')
+          alert('Sala foi alterada')
           setDialogAberto(false)
-          fecthProfessores() 
+          fecthSalas() 
         }
       } catch (error: any) {
         if (error.response) {
           alert(`Erro: ${error.response.data.message}`)
         } else {
-          alert('Erro inesperado ao alterar o professor.')
+          alert('Erro inesperado ao alterar a sala.')
         }
         setDialogAberto(true)
       }
     } else {
       try {
-        const response = await api.post('/professores', { ...prof })
+        const response = await api.post('/salas', { ...prof })
   
         if (response.status === 201) {
-          alert('Professor salvo')
+          alert('Sala salvo')
           setDialogAberto(false)
-          fecthProfessores() 
+          fecthSalas() 
         }
       } catch (error: any) {
         if (error.response) {
           alert(`Erro: ${error.response.data.message}`)
         } else {
-          alert('Erro inesperado ao salvar professor.')
+          alert('Erro inesperado ao salvar sala.')
         }
         setDialogAberto(true)
       }
     }
   }
 
-  const handleExcluir = async (prof: Professor) => {
-    await api.put(`/professores/${prof.id}`, {
+  const handleExcluir = async (prof: Sala) => {
+    await api.put(`/salas/${prof.id}`, {
       ativo: !prof.ativo
     });
-    fecthProfessores() 
+    fecthSalas() 
   }
 
   return (
     <div className="flex h-screen bg-white">
       <Sidebar />
       <div className="flex-1 overflow-auto p-6">
-        <h1 className="text-2xl font-bold mb-6">Gerenciar Professores</h1>
+        <h1 className="text-2xl font-bold mb-6">Gerenciar Locais</h1>
         <div className="border-b pb-4 mb-6" />
 
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Lista de Professores</h2>
+          <h2 className="text-xl font-semibold">Lista de Locais</h2>
           <Button onClick={abrirDialogAdicionar} variant="default" className="bg-black text-white hover:bg-gray-800">
-            Adicionar Professor
+            Adicionar Local
           </Button>
         </div>
 
@@ -133,19 +138,17 @@ export default function Professores() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Departamento</TableHead>
+                <TableHead>Capacidade</TableHead>
+                <TableHead>Tipo</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {professoresFiltrados.map((prof) => (
+              {salasFiltrados.map((prof) => (
                 <TableRow key={prof.id}>
                   <TableCell>{prof.nome}</TableCell>
-                  <TableCell>{prof.email}</TableCell>
-                  <TableCell>{prof.telefone}</TableCell>
-                  <TableCell>{prof.departamento}</TableCell>
+                  <TableCell>{prof.capacidade}</TableCell>
+                  <TableCell>{prof.tipo}</TableCell>
                   <TableCell className="flex space-x-2">
                     <Button variant="ghost" size="icon" onClick={() => abrirDialogEditar(prof.id!)}>
                       <svg
@@ -208,11 +211,11 @@ export default function Professores() {
           </Table>
         </div>
       </div>
-      <ProfessorDialog
+      <SalaDialog
         open={dialogAberto}
         onClose={() => setDialogAberto(false)}
-        onSave={salvarProfessor}
-        professor={professorSelecionado}
+        onSave={salvarSala}
+        sala={salaSelecionado}
       />
     </div>
     

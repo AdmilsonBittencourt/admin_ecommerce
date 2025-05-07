@@ -5,15 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { useEffect } from "react"
+import type { Professor } from "./professores"
 
-interface Professor {
-  id?: number
-  nome: string
-  email: string
-  telefone: string
-  departamento: string
-  ativo: boolean
-}
 
 interface Props {
   open: boolean

@@ -6,116 +6,121 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Sidebar } from "@/components/sidebar"
 import api from "@/api/api"
-import { ProfessorDialog } from "./professor-dialog"
+import { DisciplinaDialog } from "./disciplina-dialog"
 
-export interface Professor {
-    id?: number;
+export interface Disciplina {
+    id?: number,
     nome: string,
-    email: string,
-    telefone: string,
-    departamento: string,
+    codigo: string,
+    cargaHoraria: number | null,
     ativo: boolean,
 }
 
-export default function Professores() {
+export default function Disciplinas() {
   const [dialogAberto, setDialogAberto] = useState(false)
-  const [professorSelecionado, setProfessorSelecionado] = useState<Professor | null>(null)
-  const [professores, setProfessores] = useState<Professor[]>([])
+  const [disciplinaSelecionado, setDisciplinaSelecionado] = useState<Disciplina | null>(null)
+  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
   const [termoBusca, setTermoBusca] = useState("")
   const [mostrarInativos, setMostrarInativos] = useState(false)
 
-  const professoresFiltrados = professores
+  const disciplinasFiltrados = disciplinas
   .filter((prof) =>
     prof.nome.toLowerCase().includes(termoBusca.toLowerCase()) &&
     prof.ativo === !mostrarInativos
   )
 
-  const fecthProfessores = async  () => {
-    const response = await api.get('/professores');
-    if(response) {
-      setProfessores(response.data);
+  const fecthDisciplinas = async () => {
+    try {
+        const response = await api.get('/disciplinas');
+        setDisciplinas(response.data);
+    } catch(error: any) {
+        if (error.response) {
+            alert(`Erro: ${error.response.data.message}`)
+        } else {
+            alert('Erro inesperado ')
+        }
     }
   }
 
   useEffect(() => {
-    fecthProfessores();
+    fecthDisciplinas();
   }, [])
 
   const abrirDialogAdicionar = () => {
-    setProfessorSelecionado(null)
+    setDisciplinaSelecionado(null)
     setDialogAberto(true)
   }
   
   const abrirDialogEditar = (id: number) => {
-    const professor = professores.find((p) => p.id === id)
-    if (professor) {
-      setProfessorSelecionado(professor)
+    const disciplina = disciplinas.find((p) => p.id === id)
+    if (disciplina) {
+      setDisciplinaSelecionado(disciplina)
       setDialogAberto(true)
     }
   }
   
-  const salvarProfessor = async (prof: Professor) => {
+  const salvarDisciplina = async (prof: Disciplina) => {
     if (prof.id) {
       try {
-        const response = await api.put(`/professores/${prof.id}`, { ...prof })
+        const response = await api.put(`/disciplinas/${prof.id}`, { ...prof })
   
         if (response.status === 204) {
-          alert('Professor foi alterado')
+          alert('Disciplina foi alterada')
           setDialogAberto(false)
-          fecthProfessores() 
+          fecthDisciplinas() 
         }
       } catch (error: any) {
         if (error.response) {
           alert(`Erro: ${error.response.data.message}`)
         } else {
-          alert('Erro inesperado ao alterar o professor.')
+          alert('Erro inesperado ao alterar a disciplina.')
         }
         setDialogAberto(true)
       }
     } else {
       try {
-        const response = await api.post('/professores', { ...prof })
+        const response = await api.post('/disciplinas', { ...prof })
   
         if (response.status === 201) {
-          alert('Professor salvo')
+          alert('Sala salvo')
           setDialogAberto(false)
-          fecthProfessores() 
+          fecthDisciplinas() 
         }
       } catch (error: any) {
         if (error.response) {
           alert(`Erro: ${error.response.data.message}`)
         } else {
-          alert('Erro inesperado ao salvar professor.')
+          alert('Erro inesperado ao salvar a disciplina.')
         }
         setDialogAberto(true)
       }
     }
   }
 
-  const handleExcluir = async (prof: Professor) => {
-    await api.put(`/professores/${prof.id}`, {
+  const handleExcluir = async (prof: Disciplina) => {
+    await api.put(`/disciplinas/${prof.id}`, {
       ativo: !prof.ativo
     });
-    fecthProfessores() 
+    fecthDisciplinas() 
   }
 
   return (
     <div className="flex h-screen bg-white">
       <Sidebar />
       <div className="flex-1 overflow-auto p-6">
-        <h1 className="text-2xl font-bold mb-6">Gerenciar Professores</h1>
+        <h1 className="text-2xl font-bold mb-6">Gerenciar Disciplinas</h1>
         <div className="border-b pb-4 mb-6" />
 
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Lista de Professores</h2>
+          <h2 className="text-xl font-semibold">Lista de Disciplinas</h2>
           <Button onClick={abrirDialogAdicionar} variant="default" className="bg-black text-white hover:bg-gray-800">
-            Adicionar Professor
+            Adicionar Disciplina
           </Button>
         </div>
 
         <div className="mb-6 flex items-center space-x-4">
           <Input
-            placeholder="Buscar por nome..."
+            placeholder="Buscar por codigo..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             className="max-w-md"
@@ -133,19 +138,17 @@ export default function Professores() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Departamento</TableHead>
+                <TableHead>Codigo</TableHead>
+                <TableHead>Carga Horaria</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {professoresFiltrados.map((prof) => (
+              {disciplinasFiltrados.map((prof) => (
                 <TableRow key={prof.id}>
                   <TableCell>{prof.nome}</TableCell>
-                  <TableCell>{prof.email}</TableCell>
-                  <TableCell>{prof.telefone}</TableCell>
-                  <TableCell>{prof.departamento}</TableCell>
+                  <TableCell>{prof.codigo}</TableCell>
+                  <TableCell>{prof.cargaHoraria}</TableCell>
                   <TableCell className="flex space-x-2">
                     <Button variant="ghost" size="icon" onClick={() => abrirDialogEditar(prof.id!)}>
                       <svg
@@ -208,11 +211,11 @@ export default function Professores() {
           </Table>
         </div>
       </div>
-      <ProfessorDialog
+      <DisciplinaDialog
         open={dialogAberto}
         onClose={() => setDialogAberto(false)}
-        onSave={salvarProfessor}
-        professor={professorSelecionado}
+        onSave={salvarDisciplina}
+        disciplina={disciplinaSelecionado}
       />
     </div>
     
