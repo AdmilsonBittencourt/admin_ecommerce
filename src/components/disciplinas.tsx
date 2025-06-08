@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Sidebar } from "@/components/sidebar"
 import api from "@/api/api"
 import { DisciplinaDialog } from "./disciplina-dialog"
 
@@ -12,8 +11,8 @@ export interface Disciplina {
     id?: number,
     nome: string,
     codigo: string,
-    cargaHoraria: number | null,
-    ativo: boolean,
+    periodo: number | null,
+    status: boolean,
 }
 
 export default function Disciplinas() {
@@ -26,7 +25,7 @@ export default function Disciplinas() {
   const disciplinasFiltrados = disciplinas
   .filter((prof) =>
     prof.nome.toLowerCase().includes(termoBusca.toLowerCase()) &&
-    prof.ativo === !mostrarInativos
+    prof.status === !mostrarInativos
   )
 
   const fecthDisciplinas = async () => {
@@ -99,14 +98,13 @@ export default function Disciplinas() {
 
   const handleExcluir = async (prof: Disciplina) => {
     await api.put(`/disciplinas/${prof.id}`, {
-      ativo: !prof.ativo
+      status: !prof.status
     });
     fecthDisciplinas() 
   }
 
   return (
     <div className="flex h-screen bg-white">
-      <Sidebar />
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Gerenciar Disciplinas</h1>
         <div className="border-b pb-4 mb-6" />
@@ -120,7 +118,7 @@ export default function Disciplinas() {
 
         <div className="mb-6 flex items-center space-x-4">
           <Input
-            placeholder="Buscar por codigo..."
+            placeholder="Buscar por nome..."
             value={termoBusca}
             onChange={(e) => setTermoBusca(e.target.value)}
             className="max-w-md"
@@ -139,7 +137,7 @@ export default function Disciplinas() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Codigo</TableHead>
-                <TableHead>Carga Horaria</TableHead>
+                <TableHead>Periodo</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -148,7 +146,7 @@ export default function Disciplinas() {
                 <TableRow key={prof.id}>
                   <TableCell>{prof.nome}</TableCell>
                   <TableCell>{prof.codigo}</TableCell>
-                  <TableCell>{prof.cargaHoraria}</TableCell>
+                  <TableCell>{prof.periodo}</TableCell>
                   <TableCell className="flex space-x-2">
                     <Button variant="ghost" size="icon" onClick={() => abrirDialogEditar(prof.id!)}>
                       <svg
@@ -167,7 +165,7 @@ export default function Disciplinas() {
                       </svg>
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleExcluir(prof)}>
-                      {prof.ativo ? (
+                      {prof.status ? (
                         // Ícone de lixeira
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

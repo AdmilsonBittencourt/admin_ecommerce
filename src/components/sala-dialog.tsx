@@ -28,10 +28,10 @@ export function SalaDialog({ open, onClose, onSave, sala }: Props) {
     if (sala) {
       setValue("nome", sala.nome)
       setValue("capacidade", sala.capacidade)
-      setValue("tipo", sala.tipo)
-      setValue("ativo", sala.ativo)
+      setValue("local", sala.local)
+      setValue("status", sala.status)
     } else {
-      reset({ nome: "", capacidade: null, tipo: "", ativo: true })
+      reset({ nome: "", capacidade: null, local: "", status: true })
     }
   }, [sala, setValue, reset])
 
@@ -68,10 +68,10 @@ export function SalaDialog({ open, onClose, onSave, sala }: Props) {
 
           <div>
             <Input
-                placeholder="Tipo"
-              {...register("tipo", { required: "Tipo é obrigatório" })}
+                placeholder="Local"
+              {...register("local", { required: "Tipo é obrigatório" })}
             />
-            {errors.tipo && <p className="text-red-500 text-sm">{errors.tipo.message}</p>}
+            {errors.local && <p className="text-red-500 text-sm">{errors.local.message}</p>}
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

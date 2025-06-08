@@ -77,14 +77,15 @@ export function TurmaDialog({ open, onClose, onSave, turma }: Props) {
     fecthSalas()
 
     if (turma) {
-      setValue("codigo", turma.codigo)
-      setValue("horario", turma.horario)
-      setValue("semestre", turma.semestre)
+      setValue("nome", turma.nome)
+      setValue("horarioInicio", turma.horarioInicio)
+      setValue("horarioTermino", turma.horarioTermino)
+      setValue("diaSemana", turma.diaSemana)
       setValue("idProfessor", turma.idProfessor)
       setValue("idSala", turma.idSala)
       setValue("idDisciplina", turma.idDisciplina)
     } else {
-      reset({ codigo: "", horario: "", semestre: "", idProfessor: null, idSala: null, idDisciplina: null })
+      reset({ nome: "", horarioInicio: "", horarioTermino: "", diaSemana: "", idProfessor: null, idSala: null, idDisciplina: null })
     }
   }, [turma, setValue, reset])
 
@@ -103,46 +104,56 @@ export function TurmaDialog({ open, onClose, onSave, turma }: Props) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           <div>
             <Input
-              placeholder="Codigo"
-              {...register("codigo", { required: "Codigo é obrigatório" })}
+              placeholder="Nome"
+              {...register("nome", { required: "Nome é obrigatório" })}
             />
-            {errors.codigo && <p className="text-red-500 text-sm">{errors.codigo.message}</p>}
+            {errors.nome && <p className="text-red-500 text-sm">{errors.nome.message}</p>}
           </div>
 
           <div>
             <Input
-              placeholder="Horario"
-              {...register("horario", {
-                required: "horario é obrigatório"
+              placeholder="Horario de Inicio"
+              {...register("horarioInicio", {
+                required: "horario de Inicio é obrigatório"
               })}
             />
-            {errors.horario && <p className="text-red-500 text-sm">{errors.horario.message}</p>}
+            {errors.horarioInicio && <p className="text-red-500 text-sm">{errors.horarioInicio.message}</p>}
+          </div>
+
+          <div>
+            <Input
+              placeholder="Horario de Termino"
+              {...register("horarioTermino", {
+                required: "horario de Termino é obrigatório"
+              })}
+            />
+            {errors.horarioTermino && <p className="text-red-500 text-sm">{errors.horarioTermino.message}</p>}
           </div>
 
           <div>
             <select
-                {...register("semestre", { required: "Semestre é obrigatório" })}
+                {...register("diaSemana", { required: "Dia é obrigatório" })}
                 className="w-full p-2 border border-gray-300 rounded"
                 defaultValue=""
             >
                 <option value="" disabled>
-                Selecione o semestre
+                Selecione o dia
                 </option>
                 {Array.from({ length: 10 }, (_, i) => (
                 <option key={i + 1} value={`${i + 1}`}>
-                    {`${i + 1}º semestre`}
+                    {`${i + 1}`}
                 </option>
                 ))}
             </select>
-            {errors.semestre && (
-                <p className="text-red-500 text-sm">{errors.semestre.message}</p>
+            {errors.diaSemana && (
+                <p className="text-red-500 text-sm">{errors.diaSemana.message}</p>
             )}
            </div>
 
           <div>
             <select {...register("idDisciplina", { required: "Disciplina é obrigatória" })} className="w-full border rounded p-2">
               <option value="">Selecione uma disciplina</option>
-              {disciplinas.filter(d => d.ativo === true).map(d => (
+              {disciplinas.filter(d => d.status === true).map(d => (
                 <option key={d.id} value={d.id}>
                   {d.nome}
                 </option>
@@ -154,7 +165,7 @@ export function TurmaDialog({ open, onClose, onSave, turma }: Props) {
           <div>
             <select {...register("idSala", { required: "Sala é obrigatória" })} className="w-full border rounded p-2">
               <option value="">Selecione uma sala</option>
-              {salas.filter(d => d.ativo === true).map(s => (
+              {salas.filter(d => d.status === true).map(s => (
                 <option key={s.id} value={s.id}>
                   {s.nome}
                 </option>
@@ -166,7 +177,7 @@ export function TurmaDialog({ open, onClose, onSave, turma }: Props) {
           <div>
             <select {...register("idProfessor", { required: "Professor é obrigatório" })} className="w-full border rounded p-2">
               <option value="">Selecione um professor</option>
-              {professores.filter(d => d.ativo === true).map(p => (
+              {professores.filter(d => d.status === true).map(p => (
                 <option key={p.id} value={p.id}>
                   {p.nome}
                 </option>

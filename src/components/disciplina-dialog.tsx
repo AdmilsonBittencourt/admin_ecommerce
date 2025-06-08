@@ -28,10 +28,10 @@ export function DisciplinaDialog({ open, onClose, onSave, disciplina }: Props) {
     if (disciplina) {
       setValue("nome", disciplina.nome)
       setValue("codigo", disciplina.codigo)
-      setValue("cargaHoraria", disciplina.cargaHoraria)
-      setValue("ativo", disciplina.ativo)
+      setValue("periodo", disciplina.periodo)
+      setValue("status", disciplina.status)
     } else {
-      reset({ nome: "", codigo: "", cargaHoraria: null, ativo: true })
+      reset({ nome: "", codigo: "", periodo: null, status: true })
     }
   }, [disciplina, setValue, reset])
 
@@ -68,10 +68,10 @@ export function DisciplinaDialog({ open, onClose, onSave, disciplina }: Props) {
 
           <div>
             <Input
-                placeholder="Carga Horaria"
-              {...register("cargaHoraria", { required: "Carga Horaria é obrigatório" })}
+                placeholder="Periodo"
+              {...register("periodo", { required: "Periodo é obrigatório" })}
             />
-            {errors.cargaHoraria && <p className="text-red-500 text-sm">{errors.cargaHoraria.message}</p>}
+            {errors.periodo && <p className="text-red-500 text-sm">{errors.periodo.message}</p>}
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

@@ -27,22 +27,17 @@ export function ProfessorDialog({ open, onClose, onSave, professor }: Props) {
   useEffect(() => {
     if (professor) {
       setValue("nome", professor.nome)
-      setValue("email", professor.email)
-      setValue("telefone", professor.telefone)
-      setValue("departamento", professor.departamento)
-      setValue("ativo", professor.ativo)
+      setValue("cpf", professor.cpf)
+      setValue("titulacao", professor.titulacao)
+      setValue("status", professor.status)
     } else {
-      reset({ nome: "", email: "", telefone: "", departamento: "", ativo: true })
+      reset({ nome: "", cpf: undefined, titulacao: "", status: true })
     }
   }, [professor, setValue, reset])
 
   const onSubmit = (data: Professor) => {
-    const telefoneSomenteNumeros = data.telefone.replace(/\D/g, "")
-    if (!/^\d+$/.test(telefoneSomenteNumeros)) {
-      alert("O telefone deve conter apenas números.")
-      return
-    }
-
+   
+    console.log({ ...professor, ...data });
     onSave({ ...professor, ...data })
     onClose()
   }
@@ -64,32 +59,24 @@ export function ProfessorDialog({ open, onClose, onSave, professor }: Props) {
 
           <div>
             <Input
-              placeholder="Email"
-              {...register("email", {
-                required: "Email é obrigatório",
-                pattern: {
-                  value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
-                  message: "Email inválido"
-                }
+              placeholder="CPF"
+              {...register("cpf", {
+                required: "CPF é obrigatório",
+                // pattern: {
+                //   // value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                //   // message: "cpf inválido"
+                // }
               })}
             />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+            {errors.cpf && <p className="text-red-500 text-sm">{errors.cpf.message}</p>}
           </div>
 
           <div>
             <Input
-                placeholder="Telefone"
-              {...register("telefone", { required: "Telefone é obrigatório" })}
+                placeholder="Titulação"
+              {...register("titulacao", { required: "Telefone é obrigatório" })}
             />
-            {errors.telefone && <p className="text-red-500 text-sm">{errors.telefone.message}</p>}
-          </div>
-
-          <div>
-            <Input
-              placeholder="Departamento"
-              {...register("departamento", { required: "Departamento é obrigatório" })}
-            />
-            {errors.departamento && <p className="text-red-500 text-sm">{errors.departamento.message}</p>}
+            {errors.titulacao && <p className="text-red-500 text-sm">{errors.titulacao.message}</p>}
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

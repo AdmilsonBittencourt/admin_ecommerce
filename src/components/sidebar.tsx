@@ -11,7 +11,28 @@ export function Sidebar() {
 
       <nav className="space-y-4">
         <SidebarItem
-          to="/turmas"
+          to="/home"
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-gray-700"
+            >
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
+            </svg>
+          }
+          label="Home"
+        />
+        
+        <SidebarItem
+          to="/home/turmas"
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +53,7 @@ export function Sidebar() {
           label="Turmas"
         />
         <SidebarItem
-          to="/professores"
+          to="/home/professores"
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +98,7 @@ export function Sidebar() {
         //   active
         /> */}
         <SidebarItem
-          to="/locais"
+          to="/home/locais"
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +120,7 @@ export function Sidebar() {
         />
 
         <SidebarItem
-            to="/disciplinas"
+            to="/home/disciplinas"
             icon={
                 <svg
                 xmlns="http://www.w3.org/2000/svg"

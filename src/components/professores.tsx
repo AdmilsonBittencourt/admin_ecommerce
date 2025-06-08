@@ -4,17 +4,18 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Sidebar } from "@/components/sidebar"
 import api from "@/api/api"
 import { ProfessorDialog } from "./professor-dialog"
 
+export interface Cpf {
+  value: string;
+}
 export interface Professor {
     id?: number;
     nome: string,
-    email: string,
-    telefone: string,
-    departamento: string,
-    ativo: boolean,
+    cpf: Cpf,
+    titulacao: string,
+    status: boolean,
 }
 
 export default function Professores() {
@@ -27,7 +28,7 @@ export default function Professores() {
   const professoresFiltrados = professores
   .filter((prof) =>
     prof.nome.toLowerCase().includes(termoBusca.toLowerCase()) &&
-    prof.ativo === !mostrarInativos
+    prof.status === !mostrarInativos
   )
 
   const fecthProfessores = async  () => {
@@ -75,7 +76,7 @@ export default function Professores() {
     } else {
       try {
         const response = await api.post('/professores', { ...prof })
-  
+        console.log({ ...prof}) 
         if (response.status === 201) {
           alert('Professor salvo')
           setDialogAberto(false)
@@ -94,14 +95,13 @@ export default function Professores() {
 
   const handleExcluir = async (prof: Professor) => {
     await api.put(`/professores/${prof.id}`, {
-      ativo: !prof.ativo
+      ativo: !prof.status
     });
     fecthProfessores() 
   }
 
   return (
     <div className="flex h-screen bg-white">
-      <Sidebar />
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Gerenciar Professores</h1>
         <div className="border-b pb-4 mb-6" />
@@ -133,9 +133,8 @@ export default function Professores() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Telefone</TableHead>
-                <TableHead>Departamento</TableHead>
+                <TableHead>CPF</TableHead>
+                <TableHead>Titulação</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -143,9 +142,8 @@ export default function Professores() {
               {professoresFiltrados.map((prof) => (
                 <TableRow key={prof.id}>
                   <TableCell>{prof.nome}</TableCell>
-                  <TableCell>{prof.email}</TableCell>
-                  <TableCell>{prof.telefone}</TableCell>
-                  <TableCell>{prof.departamento}</TableCell>
+                  <TableCell>{prof.cpf.value}</TableCell>
+                  <TableCell>{prof.titulacao}</TableCell>
                   <TableCell className="flex space-x-2">
                     <Button variant="ghost" size="icon" onClick={() => abrirDialogEditar(prof.id!)}>
                       <svg
@@ -164,7 +162,7 @@ export default function Professores() {
                       </svg>
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleExcluir(prof)}>
-                      {prof.ativo ? (
+                      {prof.status ? (
                         // Ícone de lixeira
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

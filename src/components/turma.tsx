@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Sidebar } from "@/components/sidebar"
 import api from "@/api/api"
 import type { Professor } from "./professores"
 import { TurmaDialog } from "./turma-dialog"
@@ -13,22 +12,26 @@ import type { Disciplina } from "./disciplinas"
 
 export interface Turma {
     id?: number;
-    codigo: string;
-    horario: string;
-    semestre: string;
+    nome: string;
+    horarioInicio: string;
+    horarioTermino: string;
+    diaSemana: string;
     professor: Professor | null;
     sala: Sala | null;
     disciplina: Disciplina | null;
+    status: boolean;
 }
 
 export interface TurmaDto {
     id?: number;
-    codigo: string;
-    horario: string;
-    semestre: string;
+    nome: string;
+    horarioInicio: string;
+    horarioTermino: string;
+    diaSemana: string;
     idProfessor: number | null;
     idSala: number | null;
     idDisciplina: number | null;
+    status: boolean;
 }
 
 export default function Turmas() {
@@ -38,7 +41,7 @@ export default function Turmas() {
   const [termoBusca, setTermoBusca] = useState("")
 
   const professoresFiltrados = turmas
-  .filter((turma) => turma.codigo.toLowerCase().includes(termoBusca.toLowerCase()))
+  .filter((turma) => turma.nome.toLowerCase().includes(termoBusca.toLowerCase()))
 
   const fecthTurmas = async  () => {
     const response = await api.get('/turmas');
@@ -55,15 +58,24 @@ export default function Turmas() {
     setTurmaSelecionado(null)
     setDialogAberto(true)
   }
+
+  const handleExcluir = async (turma: Turma) => {
+    await api.put(`/turmas/${turma.id}`, {
+      status: !turma.status
+    });
+    fecthTurmas();
+  }
   
   const abrirDialogEditar = (id: number) => {
     const turma = turmas.find((p) => p.id === id)
     if (turma) {
         setTurmaSelecionado({
-            codigo: turma.codigo,
-            horario: turma.horario,
-            semestre: turma.semestre,
+            nome: turma.nome,
+            horarioInicio: turma.horarioInicio,
+            horarioTermino: turma.horarioTermino,
+            diaSemana: turma.diaSemana,
             id: turma.id,
+            status: turma.status,
             idDisciplina: turma.disciplina?.id!,
             idProfessor: turma.professor?.id!,
             idSala: turma.sala?.id!            
@@ -119,7 +131,7 @@ export default function Turmas() {
 
   return (
     <div className="flex h-screen bg-white">
-      <Sidebar />
+   
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Gerenciar Turmas</h1>
         <div className="border-b pb-4 mb-6" />
@@ -150,9 +162,10 @@ export default function Turmas() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Codigo</TableHead>
-                <TableHead>Horario</TableHead>
-                <TableHead>Semestre</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>Horario de Inicio</TableHead>
+                <TableHead>Horario de Termino</TableHead>
+                <TableHead>Dia da semana</TableHead>
                 <TableHead>Professor</TableHead>
                 <TableHead>Sala</TableHead>
                 <TableHead>Disciplina</TableHead>
@@ -162,9 +175,10 @@ export default function Turmas() {
             <TableBody>
               {professoresFiltrados.map((turma) => (
                 <TableRow key={turma.id}>
-                  <TableCell>{turma.codigo}</TableCell>
-                  <TableCell>{turma.horario}</TableCell>
-                  <TableCell>{turma.semestre}</TableCell>
+                  <TableCell>{turma.nome}</TableCell>
+                  <TableCell>{turma.horarioInicio}</TableCell>
+                  <TableCell>{turma.horarioTermino}</TableCell>
+                  <TableCell>{turma.diaSemana}</TableCell>
                   <TableCell>{turma.professor!.nome}</TableCell>
                   <TableCell>{turma.sala!.nome}</TableCell>
                   <TableCell>{turma.disciplina!.nome}</TableCell>
@@ -185,8 +199,8 @@ export default function Turmas() {
                         <path d="m15 5 4 4" />
                       </svg>
                     </Button>
-                    {/* <Button variant="ghost" size="icon" onClick={() => handleExcluir(prof)}>
-                      {prof.ativo ? (
+                    <Button variant="ghost" size="icon" onClick={() => handleExcluir(turma)}>
+                      {turma.status ? (
                         // Ícone de lixeira
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -222,7 +236,7 @@ export default function Turmas() {
                           <path d="M3.51 15a9 9 0 1 0 .49-5.27L1 10" />
                         </svg>
                       )}
-                    </Button> */}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

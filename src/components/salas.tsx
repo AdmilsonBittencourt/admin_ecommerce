@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Sidebar } from "@/components/sidebar"
 import api from "@/api/api"
 import { SalaDialog } from "./sala-dialog"
 
@@ -12,8 +11,8 @@ export interface Sala {
     id?: number,
     nome: string,
     capacidade: number | null,
-    tipo: string,
-    ativo: boolean
+    local: string,
+    status: boolean
 }
 
 export default function Salas() {
@@ -26,7 +25,7 @@ export default function Salas() {
   const salasFiltrados = salas
   .filter((prof) =>
     prof.nome.toLowerCase().includes(termoBusca.toLowerCase()) &&
-    prof.ativo === !mostrarInativos
+    prof.status === !mostrarInativos
   )
 
   const fecthSalas = async () => {
@@ -99,14 +98,14 @@ export default function Salas() {
 
   const handleExcluir = async (prof: Sala) => {
     await api.put(`/salas/${prof.id}`, {
-      ativo: !prof.ativo
+      status: !prof.status
     });
     fecthSalas() 
   }
 
   return (
     <div className="flex h-screen bg-white">
-      <Sidebar />
+    
       <div className="flex-1 overflow-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Gerenciar Locais</h1>
         <div className="border-b pb-4 mb-6" />
@@ -139,7 +138,7 @@ export default function Salas() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Capacidade</TableHead>
-                <TableHead>Tipo</TableHead>
+                <TableHead>Local</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -148,7 +147,7 @@ export default function Salas() {
                 <TableRow key={prof.id}>
                   <TableCell>{prof.nome}</TableCell>
                   <TableCell>{prof.capacidade}</TableCell>
-                  <TableCell>{prof.tipo}</TableCell>
+                  <TableCell>{prof.local}</TableCell>
                   <TableCell className="flex space-x-2">
                     <Button variant="ghost" size="icon" onClick={() => abrirDialogEditar(prof.id!)}>
                       <svg
@@ -167,7 +166,7 @@ export default function Salas() {
                       </svg>
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => handleExcluir(prof)}>
-                      {prof.ativo ? (
+                      {prof.status ? (
                         // Ícone de lixeira
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
