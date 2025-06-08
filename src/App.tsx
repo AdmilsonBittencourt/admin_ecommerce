@@ -1,10 +1,10 @@
 import { Route, Routes } from 'react-router-dom'
 import './index.css'
 
-import Professores from './components/professores'
-import Turmas from './components/turma'
-import Salas from './components/salas'
-import Disciplinas from './components/disciplinas'
+import Professores from './components/professores/professores'
+import Turmas from './components/turmas/turma'
+import Salas from './components/salas/salas'
+import Disciplinas from './components/disciplinas/disciplinas'
 import Home from './components/home'
 
 
