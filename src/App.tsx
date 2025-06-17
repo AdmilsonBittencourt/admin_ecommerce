@@ -1,11 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import './index.css'
-
-import Professores from './components/professores/professores'
-import Turmas from './components/turmas/turma'
-import Salas from './components/salas/salas'
-import Disciplinas from './components/disciplinas/disciplinas'
-import Home from './components/home'
+import Home from './pages/home'
+import ProdutosPage from './pages/Produtos'
 
 
 
@@ -13,10 +9,10 @@ function App() {
   return (
     <Routes>
       <Route path='/home' element={<Home />}>
-        <Route path="turmas" element={<Turmas /> } />
-        <Route path="professores" element={<Professores />} />
+        <Route path="produtos" element={<ProdutosPage /> } />
+        {/* <Route path="professores" element={<Professores />} />
         <Route path="locais" element={<Salas />} />
-        <Route path="disciplinas" element={<Disciplinas />} />
+        <Route path="disciplinas" element={<Disciplinas />} /> */}
       </Route>
     </Routes>  
   )
