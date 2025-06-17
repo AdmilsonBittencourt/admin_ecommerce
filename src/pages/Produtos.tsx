@@ -52,6 +52,7 @@ export default function ProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>(mockProdutos);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   
   const {
     register,
@@ -84,6 +85,7 @@ export default function ProdutosPage() {
       setEditingId(null);
     }
     setOpen(true);
+    setOpenDropdownId(null);
   };
 
   const onSubmit = (data: ProdutoFormData) => {
@@ -120,6 +122,7 @@ export default function ProdutosPage() {
 
   const handleExcluirProduto = (id: string) => {
     setProdutos(produtos.filter(p => p.id !== id));
+    setOpenDropdownId(null);
   };
 
   return (
@@ -232,7 +235,7 @@ export default function ProdutosPage() {
                     <TableCell>R$ {produto.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                     <TableCell>{produto.estoque}</TableCell>
                     <TableCell>
-                      <DropdownMenu>
+                      <DropdownMenu open={openDropdownId === produto.id} onOpenChange={(open) => setOpenDropdownId(open ? produto.id : null)}>
                         <DropdownMenuTrigger asChild>
                           <Button aria-haspopup="true" size="icon" variant="ghost">
                             <MoreHorizontal className="h-4 w-4" />
