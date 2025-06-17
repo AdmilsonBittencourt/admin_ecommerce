@@ -51,11 +51,13 @@ const mockProdutos: Produto[] = [
 export default function ProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>(mockProdutos);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors }
   } = useForm<ProdutoFormData>({
     resolver: zodResolver(produtoSchema),
@@ -67,28 +69,57 @@ export default function ProdutosPage() {
     }
   });
 
-  const onSubmit = (data: ProdutoFormData) => {
-    const novoId = `PROD${String(produtos.length + 1).padStart(3, '0')}`;
-    const produto: Produto = {
-      id: novoId,
-      nome: data.nome,
-      descricao: data.descricao,
-      preco: parseFloat(data.preco),
-      estoque: parseInt(data.estoque)
-    };
-    
-    setProdutos([...produtos, produto]);
-    reset();
-    setOpen(false);
+  const handleOpenDialog = (mode: 'add' | 'edit', id?: string) => {
+    if (mode === 'edit' && id) {
+      const produto = produtos.find(p => p.id === id);
+      if (produto) {
+        setValue('nome', produto.nome);
+        setValue('descricao', produto.descricao);
+        setValue('preco', produto.preco.toString());
+        setValue('estoque', produto.estoque.toString());
+        setEditingId(id);
+      }
+    } else {
+      reset();
+      setEditingId(null);
+    }
+    setOpen(true);
   };
 
-  const handleEditarProduto = (id: string) => {
-    console.log("Editar produto:", id);
+  const onSubmit = (data: ProdutoFormData) => {
+    if (editingId) {
+      // Editar produto existente
+      setProdutos(produtos.map(p => 
+        p.id === editingId 
+          ? {
+              ...p,
+              nome: data.nome,
+              descricao: data.descricao,
+              preco: parseFloat(data.preco),
+              estoque: parseInt(data.estoque)
+            }
+          : p
+      ));
+    } else {
+      // Adicionar novo produto
+      const novoId = `PROD${String(produtos.length + 1).padStart(3, '0')}`;
+      const produto: Produto = {
+        id: novoId,
+        nome: data.nome,
+        descricao: data.descricao,
+        preco: parseFloat(data.preco),
+        estoque: parseInt(data.estoque)
+      };
+      setProdutos([...produtos, produto]);
+    }
+    
+    reset();
+    setOpen(false);
+    setEditingId(null);
   };
 
   const handleExcluirProduto = (id: string) => {
     setProdutos(produtos.filter(p => p.id !== id));
-    console.log("Excluir produto:", id);
   };
 
   return (
@@ -105,13 +136,15 @@ export default function ProdutosPage() {
             </div>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button>Adicionar Produto</Button>
+                <Button onClick={() => handleOpenDialog('add')}>Adicionar Produto</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Adicionar Novo Produto</DialogTitle>
+                  <DialogTitle>{editingId ? 'Editar Produto' : 'Adicionar Novo Produto'}</DialogTitle>
                   <DialogDescription>
-                    Preencha os campos abaixo para adicionar um novo produto.
+                    {editingId 
+                      ? 'Atualize as informações do produto abaixo.'
+                      : 'Preencha os campos abaixo para adicionar um novo produto.'}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
@@ -166,10 +199,11 @@ export default function ProdutosPage() {
                     <Button type="button" variant="outline" onClick={() => {
                       reset();
                       setOpen(false);
+                      setEditingId(null);
                     }}>
                       Cancelar
                     </Button>
-                    <Button type="submit">Adicionar</Button>
+                    <Button type="submit">{editingId ? 'Salvar' : 'Adicionar'}</Button>
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -207,7 +241,7 @@ export default function ProdutosPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => handleEditarProduto(produto.id)}>Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleOpenDialog('edit', produto.id)}>Editar</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleExcluirProduto(produto.id)} className="text-red-600">Excluir</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
