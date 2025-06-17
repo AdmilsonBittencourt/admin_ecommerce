@@ -4,8 +4,18 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, Eye, Package, Truck, CheckCircle2, XCircle } from "lucide-react";
+import { MoreHorizontal, Eye, Package, Truck, CheckCircle2, XCircle, FileText, Calendar, Loader2 } from "lucide-react";
 import { useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { toast } from 'react-hot-toast';
+
+// Adicionar a interface para o jsPDF com autoTable
+interface jsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
 
 interface ProdutoPedido {
   id: string;
@@ -145,6 +155,7 @@ export default function PedidosPage() {
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const handleViewPedido = (pedido: Pedido) => {
     setSelectedPedido(pedido);
@@ -171,14 +182,143 @@ export default function PedidosPage() {
     });
   };
 
+  const generatePDF = (periodo: 'hoje' | 'semana' | 'mes') => {
+    setIsGeneratingReport(true);
+    
+    try {
+      const doc = new jsPDF() as jsPDFWithAutoTable;
+      const today = new Date();
+      let startDate: Date;
+      let title: string;
+
+      // Definir período do relatório
+      switch (periodo) {
+        case 'hoje':
+          startDate = new Date(today.setHours(0, 0, 0, 0));
+          title = 'Relatório de Pedidos - Hoje';
+          break;
+        case 'semana':
+          startDate = new Date(today.setDate(today.getDate() - 7));
+          title = 'Relatório de Pedidos - Última Semana';
+          break;
+        case 'mes':
+          startDate = new Date(today.setDate(today.getDate() - 30));
+          title = 'Relatório de Pedidos - Último Mês';
+          break;
+      }
+
+      // Filtrar pedidos pelo período
+      const pedidosFiltrados = pedidos.filter(pedido => {
+        const pedidoDate = new Date(pedido.data);
+        return pedidoDate >= startDate && pedidoDate <= new Date();
+      });
+
+      // Adicionar título
+      doc.setFontSize(16);
+      doc.text(title, 14, 15);
+      doc.setFontSize(10);
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 22);
+
+      // Configurar tabela
+      const tableColumn = ['Número', 'Cliente', 'Data', 'Valor Total', 'Status', 'Forma de Pagamento'];
+      const tableRows: any[] = [];
+
+      // Preencher dados
+      pedidosFiltrados.forEach(pedido => {
+        const pedidoData = [
+          pedido.numero,
+          pedido.cliente.nome,
+          formatDate(pedido.data),
+          `R$ ${pedido.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+          statusConfig[pedido.status].label,
+          pedido.formaPagamento === 'cartao' ? 'Cartão de Crédito' :
+          pedido.formaPagamento === 'boleto' ? 'Boleto' : 'PIX'
+        ];
+        tableRows.push(pedidoData);
+      });
+
+      // Adicionar tabela ao PDF
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 30,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [41, 128, 185] }
+      });
+
+      // Adicionar resumo
+      const totalPedidos = pedidosFiltrados.length;
+      const valorTotal = pedidosFiltrados.reduce((acc, pedido) => acc + pedido.valorTotal, 0);
+      const pedidosPorStatus = pedidosFiltrados.reduce((acc, pedido) => {
+        acc[pedido.status] = (acc[pedido.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      doc.setFontSize(12);
+      doc.text('Resumo:', 14, doc.lastAutoTable.finalY + 15);
+      doc.setFontSize(10);
+      doc.text(`Total de Pedidos: ${totalPedidos}`, 14, doc.lastAutoTable.finalY + 25);
+      doc.text(`Valor Total: R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 14, doc.lastAutoTable.finalY + 32);
+      
+      let yOffset = 40;
+      doc.text('Pedidos por Status:', 14, doc.lastAutoTable.finalY + yOffset);
+      Object.entries(pedidosPorStatus).forEach(([status, count], index) => {
+        doc.text(`${statusConfig[status as keyof typeof statusConfig].label}: ${count}`, 14, doc.lastAutoTable.finalY + yOffset + 8 + (index * 8));
+      });
+
+      // Salvar PDF
+      doc.save(`relatorio-pedidos-${periodo}-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('Relatório gerado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
+      toast.error('Erro ao gerar relatório');
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
   return (
     <main className="flex-1 overflow-y-auto p-4 md:p-8">
       <Card>
-        <CardHeader>
-          <CardTitle>Gerenciamento de Pedidos</CardTitle>
-          <CardDescription>
-            Visualize e gerencie todos os pedidos do seu e-commerce.
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Gerenciamento de Pedidos</CardTitle>
+            <CardDescription>
+              Visualize e gerencie todos os pedidos do seu e-commerce.
+            </CardDescription>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={isGeneratingReport}>
+                {isGeneratingReport ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Gerando...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Relatório
+                  </>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Selecione o Período</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => generatePDF('hoje')}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Hoje
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => generatePDF('semana')}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Última Semana
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => generatePDF('mes')}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Último Mês
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardHeader>
         <CardContent>
           <Table>
