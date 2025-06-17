@@ -4,8 +4,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { MoreHorizontal } from "lucide-react";
-import { useState } from 'react';
+import { MoreHorizontal, Upload } from "lucide-react";
+import { useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,7 @@ interface Produto {
   descricao: string;
   preco: number;
   estoque: number;
+  imagem?: string;
 }
 
 const produtoSchema = z.object({
@@ -35,7 +36,8 @@ const produtoSchema = z.object({
     .min(1, "O estoque é obrigatório")
     .refine((val) => !isNaN(parseInt(val)) && parseInt(val) >= 0, {
       message: "O estoque deve ser um número inteiro maior ou igual a zero"
-    })
+    }),
+  imagem: z.string().optional()
 });
 
 type ProdutoFormData = z.infer<typeof produtoSchema>;
@@ -53,6 +55,8 @@ export default function ProdutosPage() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const {
     register,
@@ -66,9 +70,23 @@ export default function ProdutosPage() {
       nome: "",
       descricao: "",
       preco: "",
-      estoque: ""
+      estoque: "",
+      imagem: ""
     }
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPreviewImage(base64String);
+        setValue('imagem', base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleOpenDialog = (mode: 'add' | 'edit', id?: string) => {
     if (mode === 'edit' && id) {
@@ -78,10 +96,13 @@ export default function ProdutosPage() {
         setValue('descricao', produto.descricao);
         setValue('preco', produto.preco.toString());
         setValue('estoque', produto.estoque.toString());
+        setValue('imagem', produto.imagem || '');
+        setPreviewImage(produto.imagem || null);
         setEditingId(id);
       }
     } else {
       reset();
+      setPreviewImage(null);
       setEditingId(null);
     }
     setOpen(true);
@@ -98,7 +119,8 @@ export default function ProdutosPage() {
               nome: data.nome,
               descricao: data.descricao,
               preco: parseFloat(data.preco),
-              estoque: parseInt(data.estoque)
+              estoque: parseInt(data.estoque),
+              imagem: data.imagem
             }
           : p
       ));
@@ -110,12 +132,14 @@ export default function ProdutosPage() {
         nome: data.nome,
         descricao: data.descricao,
         preco: parseFloat(data.preco),
-        estoque: parseInt(data.estoque)
+        estoque: parseInt(data.estoque),
+        imagem: data.imagem
       };
       setProdutos([...produtos, produto]);
     }
     
     reset();
+    setPreviewImage(null);
     setOpen(false);
     setEditingId(null);
   };
@@ -151,6 +175,54 @@ export default function ProdutosPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <label htmlFor="imagem">Imagem do Produto</label>
+                    <div className="flex flex-col items-center gap-4">
+                      {previewImage && (
+                        <div className="relative w-32 h-32">
+                          <img
+                            src={previewImage}
+                            alt="Preview"
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2"
+                            onClick={() => {
+                              setPreviewImage(null);
+                              setValue('imagem', '');
+                              if (fileInputRef.current) {
+                                fileInputRef.current.value = '';
+                              }
+                            }}
+                          >
+                            <span className="sr-only">Remover imagem</span>
+                            ×
+                          </Button>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="imagem"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          ref={fileInputRef}
+                          onChange={handleImageChange}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          {previewImage ? 'Alterar Imagem' : 'Adicionar Imagem'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                   <div className="grid gap-2">
                     <label htmlFor="nome">Nome</label>
                     <Input
@@ -201,6 +273,7 @@ export default function ProdutosPage() {
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => {
                       reset();
+                      setPreviewImage(null);
                       setOpen(false);
                       setEditingId(null);
                     }}>
@@ -216,6 +289,7 @@ export default function ProdutosPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Imagem</TableHead>
                   <TableHead>ID</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead>Descrição</TableHead>
@@ -229,6 +303,19 @@ export default function ProdutosPage() {
               <TableBody>
                 {produtos.map((produto) => (
                   <TableRow key={produto.id}>
+                    <TableCell>
+                      {produto.imagem ? (
+                        <img
+                          src={produto.imagem}
+                          alt={produto.nome}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground">Sem imagem</span>
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">{produto.id}</TableCell>
                     <TableCell>{produto.nome}</TableCell>
                     <TableCell className="hidden md:table-cell max-w-xs truncate">{produto.descricao}</TableCell>
