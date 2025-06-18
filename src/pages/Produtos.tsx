@@ -9,7 +9,8 @@ import { useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { mockProdutos, type Produto } from "@/lib/mock-data";
+import { useAppContext } from "@/lib/context";
+import { type Produto } from "@/lib/mock-data";
 // import { Sidebar } from "@/components/sidebar"; // Sidebar import removed
 
 const produtoSchema = z.object({
@@ -35,7 +36,7 @@ const produtoSchema = z.object({
 type ProdutoFormData = z.infer<typeof produtoSchema>;
 
 export default function ProdutosPage() {
-  const [produtos, setProdutos] = useState<Produto[]>(mockProdutos);
+  const { produtos, addProduto, updateProduto, deleteProduto } = useAppContext();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -96,19 +97,13 @@ export default function ProdutosPage() {
   const onSubmit = (data: ProdutoFormData) => {
     if (editingId) {
       // Editar produto existente
-      setProdutos(produtos.map(p => 
-        p.id === editingId 
-          ? {
-              ...p,
-              nome: data.nome,
-              descricao: data.descricao,
-              preco: parseFloat(data.preco),
-              estoque: parseInt(data.estoque),
-              imagem: data.imagem,
-              updatedAt: new Date().toISOString()
-            }
-          : p
-      ));
+      updateProduto(editingId, {
+        nome: data.nome,
+        descricao: data.descricao,
+        preco: parseFloat(data.preco),
+        estoque: parseInt(data.estoque),
+        imagem: data.imagem
+      });
     } else {
       // Adicionar novo produto
       const novoId = `PROD${String(produtos.length + 1).padStart(3, '0')}`;
@@ -124,7 +119,7 @@ export default function ProdutosPage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      setProdutos([...produtos, produto]);
+      addProduto(produto);
     }
     
     reset();
@@ -134,7 +129,7 @@ export default function ProdutosPage() {
   };
 
   const handleExcluirProduto = (id: string) => {
-    setProdutos(produtos.filter(p => p.id !== id));
+    deleteProduto(id);
     setOpenDropdownId(null);
   };
 

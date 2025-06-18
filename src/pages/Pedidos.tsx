@@ -9,7 +9,8 @@ import { useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
-import { mockPedidos, mockClientes, mockProdutos, type Pedido, type Cliente, type Produto } from "@/lib/mock-data";
+import { useAppContext } from "@/lib/context";
+import { type Pedido } from "@/lib/mock-data";
 
 // Adicionar a interface para o jsPDF com autoTable
 interface jsPDFWithAutoTable extends jsPDF {
@@ -18,7 +19,7 @@ interface jsPDFWithAutoTable extends jsPDF {
   };
 }
 
-// Interface para adaptar os dados do mock centralizado
+// Interface para adaptar os dados do contexto para o formato de exibição
 interface PedidoDisplay {
   id: string;
   numero: string;
@@ -50,84 +51,86 @@ interface PedidoDisplay {
   observacoes?: string;
 }
 
-// Função para converter dados do mock centralizado para o formato de exibição
-const convertPedidosForDisplay = (): PedidoDisplay[] => {
-  return mockPedidos.map(pedido => {
-    const cliente = mockClientes.find(c => c.id === pedido.clienteId);
-    const produtosComDetalhes = pedido.produtos.map(item => {
-      const produto = mockProdutos.find(p => p.id === item.produtoId);
-      return {
-        id: item.produtoId,
-        nome: produto?.nome || 'Produto não encontrado',
-        quantidade: item.quantidade,
-        precoUnitario: item.precoUnitario,
-        imagem: produto?.imagem
-      };
-    });
-
-    // Mapear status do mock centralizado para o formato de exibição
-    const statusMapping: Record<string, PedidoDisplay['status']> = {
-      'pendente': 'pendente',
-      'aprovado': 'processando',
-      'em_preparo': 'processando',
-      'enviado': 'enviado',
-      'entregue': 'entregue',
-      'cancelado': 'cancelado'
-    };
-
-    return {
-      id: pedido.id,
-      numero: pedido.id,
-      cliente: {
-        nome: cliente?.nome || 'Cliente não encontrado',
-        email: cliente?.email || '',
-        telefone: cliente?.telefone || ''
-      },
-      endereco: pedido.enderecoEntrega,
-      produtos: produtosComDetalhes,
-      status: statusMapping[pedido.status] || 'pendente',
-      data: pedido.dataPedido,
-      valorTotal: pedido.total,
-      formaPagamento: pedido.formaPagamento,
-      observacoes: pedido.observacoes
-    };
-  });
-};
-
-const statusConfig = {
-  pendente: {
-    label: "Pendente",
-    color: "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20",
-    icon: Package
-  },
-  processando: {
-    label: "Processando",
-    color: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
-    icon: Package
-  },
-  enviado: {
-    label: "Enviado",
-    color: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
-    icon: Truck
-  },
-  entregue: {
-    label: "Entregue",
-    color: "bg-green-500/10 text-green-500 hover:bg-green-500/20",
-    icon: CheckCircle2
-  },
-  cancelado: {
-    label: "Cancelado",
-    color: "bg-red-500/10 text-red-500 hover:bg-red-500/20",
-    icon: XCircle
-  }
-};
-
 export default function PedidosPage() {
-  const [pedidos, setPedidos] = useState<PedidoDisplay[]>(convertPedidosForDisplay());
+  const { pedidos, clientes, produtos, updatePedido } = useAppContext();
   const [selectedPedido, setSelectedPedido] = useState<PedidoDisplay | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+  // Função para converter dados do contexto para o formato de exibição
+  const convertPedidosForDisplay = (): PedidoDisplay[] => {
+    return pedidos.map(pedido => {
+      const cliente = clientes.find(c => c.id === pedido.clienteId);
+      const produtosComDetalhes = pedido.produtos.map(item => {
+        const produto = produtos.find(p => p.id === item.produtoId);
+        return {
+          id: item.produtoId,
+          nome: produto?.nome || 'Produto não encontrado',
+          quantidade: item.quantidade,
+          precoUnitario: item.precoUnitario,
+          imagem: produto?.imagem
+        };
+      });
+
+      // Mapear status do contexto para o formato de exibição
+      const statusMapping: Record<string, PedidoDisplay['status']> = {
+        'pendente': 'pendente',
+        'aprovado': 'processando',
+        'em_preparo': 'processando',
+        'enviado': 'enviado',
+        'entregue': 'entregue',
+        'cancelado': 'cancelado'
+      };
+
+      return {
+        id: pedido.id,
+        numero: pedido.id,
+        cliente: {
+          nome: cliente?.nome || 'Cliente não encontrado',
+          email: cliente?.email || '',
+          telefone: cliente?.telefone || ''
+        },
+        endereco: pedido.enderecoEntrega,
+        produtos: produtosComDetalhes,
+        status: statusMapping[pedido.status] || 'pendente',
+        data: pedido.dataPedido,
+        valorTotal: pedido.total,
+        formaPagamento: pedido.formaPagamento,
+        observacoes: pedido.observacoes
+      };
+    });
+  };
+
+  const pedidosDisplay = convertPedidosForDisplay();
+
+  const statusConfig = {
+    pendente: {
+      label: "Pendente",
+      color: "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20",
+      icon: Package
+    },
+    processando: {
+      label: "Processando",
+      color: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
+      icon: Package
+    },
+    enviado: {
+      label: "Enviado",
+      color: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
+      icon: Truck
+    },
+    entregue: {
+      label: "Entregue",
+      color: "bg-green-500/10 text-green-500 hover:bg-green-500/20",
+      icon: CheckCircle2
+    },
+    cancelado: {
+      label: "Cancelado",
+      color: "bg-red-500/10 text-red-500 hover:bg-red-500/20",
+      icon: XCircle
+    }
+  };
 
   const handleViewPedido = (pedido: PedidoDisplay) => {
     setSelectedPedido(pedido);
@@ -136,11 +139,19 @@ export default function PedidosPage() {
   };
 
   const handleUpdateStatus = (pedidoId: string, newStatus: PedidoDisplay['status']) => {
-    setPedidos(pedidos.map(pedido => 
-      pedido.id === pedidoId 
-        ? { ...pedido, status: newStatus }
-        : pedido
-    ));
+    // Mapear status de exibição para status do contexto
+    const statusMapping: Record<string, Pedido['status']> = {
+      'pendente': 'pendente',
+      'processando': 'aprovado',
+      'enviado': 'enviado',
+      'entregue': 'entregue',
+      'cancelado': 'cancelado'
+    };
+
+    const contextStatus = statusMapping[newStatus];
+    if (contextStatus) {
+      updatePedido(pedidoId, { status: contextStatus });
+    }
     setOpenDropdownId(null);
   };
 
@@ -180,7 +191,7 @@ export default function PedidosPage() {
       }
 
       // Filtrar pedidos pelo período
-      const pedidosFiltrados = pedidos.filter(pedido => {
+      const pedidosFiltrados = pedidosDisplay.filter(pedido => {
         const pedidoDate = new Date(pedido.data);
         return pedidoDate >= startDate && pedidoDate <= new Date();
       });
@@ -308,7 +319,7 @@ export default function PedidosPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pedidos.map((pedido) => {
+              {pedidosDisplay.map((pedido) => {
                 const StatusIcon = statusConfig[pedido.status].icon;
                 return (
                   <TableRow key={pedido.id}>
@@ -381,7 +392,7 @@ export default function PedidosPage() {
               })}
             </TableBody>
           </Table>
-          {pedidos.length === 0 && (
+          {pedidosDisplay.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               Nenhum pedido encontrado.
             </div>

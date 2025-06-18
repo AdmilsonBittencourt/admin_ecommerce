@@ -1,17 +1,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getDashboardStats, mockPedidos, mockClientes } from "@/lib/mock-data";
+import { useAppContext } from "@/lib/context";
 
 export default function Dashboard() {
-    // Usar dados do mock centralizado
+    // Usar dados do contexto global
+    const { pedidos, clientes, getDashboardStats } = useAppContext();
     const stats = getDashboardStats();
     
     // Pegar os 5 pedidos mais recentes
-    const recentOrders = mockPedidos
+    const recentOrders = pedidos
         .sort((a, b) => new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime())
         .slice(0, 5)
         .map(pedido => {
-            const cliente = mockClientes.find(c => c.id === pedido.clienteId);
+            const cliente = clientes.find(c => c.id === pedido.clienteId);
             return {
                 id: pedido.id,
                 customer: cliente?.nome || 'Cliente não encontrado',
