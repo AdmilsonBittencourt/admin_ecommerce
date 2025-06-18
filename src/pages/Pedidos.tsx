@@ -21,7 +21,7 @@ interface jsPDFWithAutoTable extends jsPDF {
 
 // Interface para adaptar os dados do contexto para o formato de exibição
 interface PedidoDisplay {
-  id: string;
+  id: number;
   numero: string;
   cliente: {
     nome: string;
@@ -38,7 +38,7 @@ interface PedidoDisplay {
     cep: string;
   };
   produtos: Array<{
-    id: string;
+    id: number;
     nome: string;
     quantidade: number;
     precoUnitario: number;
@@ -55,7 +55,7 @@ export default function PedidosPage() {
   const { pedidos, clientes, produtos, updatePedido } = useAppContext();
   const [selectedPedido, setSelectedPedido] = useState<PedidoDisplay | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   // Função para converter dados do contexto para o formato de exibição
@@ -85,7 +85,7 @@ export default function PedidosPage() {
 
       return {
         id: pedido.id,
-        numero: pedido.id,
+        numero: pedido.id.toString(),
         cliente: {
           nome: cliente?.nome || 'Cliente não encontrado',
           email: cliente?.email || '',
@@ -138,7 +138,7 @@ export default function PedidosPage() {
     setOpenDropdownId(null);
   };
 
-  const handleUpdateStatus = (pedidoId: string, newStatus: PedidoDisplay['status']) => {
+  const handleUpdateStatus = (pedidoId: number, newStatus: PedidoDisplay['status']) => {
     // Mapear status de exibição para status do contexto
     const statusMapping: Record<string, Pedido['status']> = {
       'pendente': 'pendente',

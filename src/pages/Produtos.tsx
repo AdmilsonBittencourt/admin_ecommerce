@@ -38,8 +38,8 @@ type ProdutoFormData = z.infer<typeof produtoSchema>;
 export default function ProdutosPage() {
   const { produtos, addProduto, updateProduto, deleteProduto } = useAppContext();
   const [open, setOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -73,7 +73,7 @@ export default function ProdutosPage() {
     }
   };
 
-  const handleOpenDialog = (mode: 'add' | 'edit', id?: string) => {
+  const handleOpenDialog = (mode: 'add' | 'edit', id?: number) => {
     if (mode === 'edit' && id) {
       const produto = produtos.find(p => p.id === id);
       if (produto) {
@@ -106,7 +106,7 @@ export default function ProdutosPage() {
       });
     } else {
       // Adicionar novo produto
-      const novoId = `PROD${String(produtos.length + 1).padStart(3, '0')}`;
+      const novoId = produtos.length > 0 ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
       const produto: Produto = {
         id: novoId,
         nome: data.nome,
@@ -128,7 +128,7 @@ export default function ProdutosPage() {
     setEditingId(null);
   };
 
-  const handleExcluirProduto = (id: string) => {
+  const handleExcluirProduto = (id: number) => {
     deleteProduto(id);
     setOpenDropdownId(null);
   };

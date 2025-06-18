@@ -1,13 +1,51 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import type React from 'react'
+import { useAppContext } from '@/lib/context'
+import { toast } from 'sonner'
 
 export function Sidebar() {
+  const { usuarioLogado, logout } = useAppContext();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Logout realizado com sucesso!");
+    navigate('/login');
+  };
+
   return (
     <div className="w-64 bg-white border-r h-full p-6 flex flex-col">
       <div className="mb-8">
         <h2 className="text-xl font-bold">E-commerce</h2>
         <h2 className="text-xl font-bold">Perfumes</h2>
       </div>
+
+      {/* Informações do usuário logado */}
+      {usuarioLogado && (
+        <div className="mb-6 p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3">
+            {usuarioLogado.avatar ? (
+              <img 
+                src={usuarioLogado.avatar} 
+                alt={usuarioLogado.nome}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                {usuarioLogado.nome.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {usuarioLogado.nome}
+              </p>
+              <p className="text-xs text-gray-500 capitalize">
+                {usuarioLogado.cargo}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <nav className="space-y-4 flex-grow">
         <SidebarItem
@@ -63,8 +101,8 @@ export function Sidebar() {
       </nav>
       <div className="mt-auto">
         <button 
-          onClick={() => console.log("Sair clicado")}
-          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 w-full text-left text-red-600"
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-100 w-full text-left text-red-600 transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

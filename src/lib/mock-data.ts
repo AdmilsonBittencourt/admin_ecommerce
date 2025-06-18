@@ -1,6 +1,6 @@
 // Tipos de dados da aplicação
 export interface Produto {
-  id: string;
+  id: number;
   nome: string;
   descricao: string;
   preco: number;
@@ -13,10 +13,10 @@ export interface Produto {
 }
 
 export interface Pedido {
-  id: string;
+  id: number;
   clienteId: string;
   produtos: Array<{
-    produtoId: string;
+    produtoId: number;
     quantidade: number;
     precoUnitario: number;
   }>;
@@ -62,6 +62,7 @@ export interface Usuario {
   nome: string;
   email: string;
   telefone: string;
+  senha: string;
   cargo: 'admin' | 'gerente' | 'vendedor' | 'estoque';
   avatar?: string;
   dataCadastro: string;
@@ -79,7 +80,7 @@ export interface Categoria {
 // Dados mock da aplicação
 export const mockProdutos: Produto[] = [
   {
-    id: "PROD001",
+    id: 1,
     nome: "Chanel No. 5",
     descricao: "Perfume floral aldeídico icônico com notas de rosa, jasmim e baunilha. Uma fragrância atemporal que define elegância.",
     preco: 750.90,
@@ -91,7 +92,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-15T10:30:00Z"
   },
   {
-    id: "PROD002",
+    id: 2,
     nome: "Dior Sauvage",
     descricao: "Fragrância masculina fresca e amadeirada com notas de bergamota, pimenta e ambroxan. Ideal para o homem moderno.",
     preco: 550.00,
@@ -103,7 +104,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-16T14:20:00Z"
   },
   {
-    id: "PROD003",
+    id: 3,
     nome: "Creed Aventus",
     descricao: "Perfume chipre frutado luxuoso com notas de abacaxi, maçã e musgo de carvalho. Sinônimo de sofisticação.",
     preco: 1800.50,
@@ -115,7 +116,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-17T09:15:00Z"
   },
   {
-    id: "PROD004",
+    id: 4,
     nome: "Yves Saint Laurent Black Opium",
     descricao: "Fragrância oriental baunilha viciante com notas de café, baunilha e flores brancas. Para mulheres ousadas.",
     preco: 620.75,
@@ -127,7 +128,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-18T16:45:00Z"
   },
   {
-    id: "PROD005",
+    id: 5,
     nome: "Tom Ford Oud Wood",
     descricao: "Perfume amadeirado exótico e raro com notas de oud, sândalo e baunilha. Uma experiência olfativa única.",
     preco: 1200.00,
@@ -139,7 +140,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-19T11:30:00Z"
   },
   {
-    id: "PROD006",
+    id: 6,
     nome: "Jo Malone London Wood Sage & Sea Salt",
     descricao: "Fragrância fresca e mineral com notas de sal marinho, sálvia e ambrette. Perfeita para o dia a dia.",
     preco: 480.00,
@@ -151,7 +152,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-20T13:20:00Z"
   },
   {
-    id: "PROD007",
+    id: 7,
     nome: "Maison Margiela Replica Jazz Club",
     descricao: "Fragrância amadeirada com notas de rum, tabaco e baunilha. Inspirada na atmosfera de um jazz club.",
     preco: 680.00,
@@ -163,7 +164,7 @@ export const mockProdutos: Produto[] = [
     updatedAt: "2024-01-21T15:10:00Z"
   },
   {
-    id: "PROD008",
+    id: 8,
     nome: "Byredo Gypsy Water",
     descricao: "Fragrância nômade com notas de bergamota, limão e sândalo. Uma viagem olfativa pela liberdade.",
     preco: 890.00,
@@ -237,11 +238,11 @@ export const mockClientes: Cliente[] = [
 
 export const mockPedidos: Pedido[] = [
   {
-    id: "PED001",
+    id: 1,
     clienteId: "CLI001",
     produtos: [
-      { produtoId: "PROD001", quantidade: 1, precoUnitario: 750.90 },
-      { produtoId: "PROD004", quantidade: 2, precoUnitario: 620.75 }
+      { produtoId: 1, quantidade: 1, precoUnitario: 750.90 },
+      { produtoId: 4, quantidade: 2, precoUnitario: 620.75 }
     ],
     status: "entregue",
     total: 1992.40,
@@ -260,10 +261,10 @@ export const mockPedidos: Pedido[] = [
     observacoes: "Entregar após 18h"
   },
   {
-    id: "PED002",
+    id: 2,
     clienteId: "CLI002",
     produtos: [
-      { produtoId: "PROD002", quantidade: 1, precoUnitario: 550.00 }
+      { produtoId: 2, quantidade: 1, precoUnitario: 550.00 }
     ],
     status: "enviado",
     total: 550.00,
@@ -279,11 +280,11 @@ export const mockPedidos: Pedido[] = [
     formaPagamento: "pix"
   },
   {
-    id: "PED003",
+    id: 3,
     clienteId: "CLI003",
     produtos: [
-      { produtoId: "PROD003", quantidade: 1, precoUnitario: 1800.50 },
-      { produtoId: "PROD005", quantidade: 1, precoUnitario: 1200.00 }
+      { produtoId: 3, quantidade: 1, precoUnitario: 1800.50 },
+      { produtoId: 5, quantidade: 1, precoUnitario: 1200.00 }
     ],
     status: "aprovado",
     total: 3000.50,
@@ -305,8 +306,9 @@ export const mockUsuarios: Usuario[] = [
   {
     id: "USR001",
     nome: "Admin Sistema",
-    email: "admin@universys.com",
+    email: "admin@gmail.com",
     telefone: "(11) 99999-9999",
+    senha: "123456",
     cargo: "admin",
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     dataCadastro: "2024-01-01T00:00:00Z",
@@ -318,6 +320,7 @@ export const mockUsuarios: Usuario[] = [
     nome: "Gerente Vendas",
     email: "gerente@universys.com",
     telefone: "(11) 88888-8888",
+    senha: "123456",
     cargo: "gerente",
     avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
     dataCadastro: "2024-01-02T00:00:00Z",
@@ -329,6 +332,7 @@ export const mockUsuarios: Usuario[] = [
     nome: "Vendedor João",
     email: "joao.vendedor@universys.com",
     telefone: "(11) 77777-7777",
+    senha: "123456",
     cargo: "vendedor",
     dataCadastro: "2024-01-03T00:00:00Z",
     ultimoAcesso: "2024-01-22T14:20:00Z",
@@ -364,7 +368,7 @@ export const mockCategorias: Categoria[] = [
 ];
 
 // Funções utilitárias para manipular os dados mock
-export const getProdutoById = (id: string): Produto | undefined => {
+export const getProdutoById = (id: number): Produto | undefined => {
   return mockProdutos.find(produto => produto.id === id);
 };
 
@@ -372,7 +376,7 @@ export const getClienteById = (id: string): Cliente | undefined => {
   return mockClientes.find(cliente => cliente.id === id);
 };
 
-export const getPedidoById = (id: string): Pedido | undefined => {
+export const getPedidoById = (id: number): Pedido | undefined => {
   return mockPedidos.find(pedido => pedido.id === id);
 };
 
@@ -410,4 +414,26 @@ export const getDashboardStats = () => {
     totalProdutos: mockProdutos.length,
     totalPedidos: mockPedidos.length
   };
+};
+
+// Função para autenticação de usuário
+export const autenticarUsuario = (email: string, senha: string): Usuario | null => {
+  const usuario = mockUsuarios.find(user => 
+    user.email === email && 
+    user.senha === senha && 
+    user.status === 'ativo'
+  );
+  
+  if (usuario) {
+    // Atualizar último acesso
+    usuario.ultimoAcesso = new Date().toISOString();
+    return usuario;
+  }
+  
+  return null;
+};
+
+// Função para buscar usuário por email
+export const getUsuarioByEmail = (email: string): Usuario | undefined => {
+  return mockUsuarios.find(usuario => usuario.email === email);
 }; 

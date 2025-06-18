@@ -13,7 +13,6 @@ import { mockUsuarios } from "@/lib/mock-data";
 const perfilSchema = z.object({
   nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
   email: z.string().email("Email inválido"),
-  telefone: z.string().min(10, "Telefone inválido"),
   senhaAtual: z.string().min(6, "Senha atual deve ter no mínimo 6 caracteres").optional(),
   novaSenha: z.string().min(6, "Nova senha deve ter no mínimo 6 caracteres").optional(),
   confirmarSenha: z.string().optional(),
@@ -41,7 +40,6 @@ type PerfilFormData = z.infer<typeof perfilSchema>;
 const mockAdminData = mockUsuarios.find(user => user.cargo === 'admin') || {
   nome: "Admin",
   email: "admin@universys.com",
-  telefone: "(11) 99999-9999",
   avatar: "https://github.com/shadcn.png"
 };
 
@@ -60,7 +58,6 @@ export default function PerfilPage() {
     defaultValues: {
       nome: mockAdminData.nome,
       email: mockAdminData.email,
-      telefone: mockAdminData.telefone,
     }
   });
 
@@ -171,18 +168,6 @@ export default function PerfilPage() {
                   />
                   {errors.email && (
                     <p className="text-sm text-red-500">{errors.email.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone</Label>
-                  <Input
-                    id="telefone"
-                    {...register("telefone")}
-                    placeholder="(00) 00000-0000"
-                  />
-                  {errors.telefone && (
-                    <p className="text-sm text-red-500">{errors.telefone.message}</p>
                   )}
                 </div>
 

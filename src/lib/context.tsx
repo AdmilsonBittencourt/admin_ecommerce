@@ -8,7 +8,8 @@ import {
   type Produto, 
   type Pedido, 
   type Cliente, 
-  type Usuario 
+  type Usuario,
+  autenticarUsuario
 } from './mock-data';
 
 // Interface para o contexto
@@ -19,6 +20,14 @@ interface AppContextType {
   clientes: Cliente[];
   usuarios: Usuario[];
   
+  // Autenticação
+  usuarioLogado: Usuario | null;
+  isAuthenticated: boolean;
+  
+  // Funções de autenticação
+  login: (email: string, senha: string) => Promise<{ success: boolean; message: string }>;
+  logout: () => void;
+  
   // Funções para atualizar dados
   updateProdutos: (produtos: Produto[]) => void;
   updatePedidos: (pedidos: Pedido[]) => void;
@@ -27,12 +36,12 @@ interface AppContextType {
   
   // Funções específicas para operações CRUD
   addProduto: (produto: Produto) => void;
-  updateProduto: (id: string, produto: Partial<Produto>) => void;
-  deleteProduto: (id: string) => void;
+  updateProduto: (id: number, produto: Partial<Produto>) => void;
+  deleteProduto: (id: number) => void;
   
   addPedido: (pedido: Pedido) => void;
-  updatePedido: (id: string, pedido: Partial<Pedido>) => void;
-  deletePedido: (id: string) => void;
+  updatePedido: (id: number, pedido: Partial<Pedido>) => void;
+  deletePedido: (id: number) => void;
   
   // Funções utilitárias
   getDashboardStats: () => {
@@ -68,6 +77,31 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [pedidos, setPedidos] = useState<Pedido[]>(mockPedidos);
   const [clientes, setClientes] = useState<Cliente[]>(mockClientes);
   const [usuarios, setUsuarios] = useState<Usuario[]>(mockUsuarios);
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+
+  // Função de login
+  const login = async (email: string, senha: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const usuario = autenticarUsuario(email, senha);
+      
+      if (usuario) {
+        setUsuarioLogado(usuario);
+        return { success: true, message: "Login realizado com sucesso!" };
+      } else {
+        return { success: false, message: "Email ou senha incorretos" };
+      }
+    } catch (error) {
+      return { success: false, message: "Erro ao realizar login" };
+    }
+  };
+
+  // Função de logout
+  const logout = () => {
+    setUsuarioLogado(null);
+  };
 
   // Funções para atualizar dados
   const updateProdutos = (newProdutos: Produto[]) => {
@@ -91,7 +125,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setProdutos(prev => [...prev, produto]);
   };
 
-  const updateProduto = (id: string, produtoAtualizado: Partial<Produto>) => {
+  const updateProduto = (id: number, produtoAtualizado: Partial<Produto>) => {
     setProdutos(prev => prev.map(produto => 
       produto.id === id 
         ? { ...produto, ...produtoAtualizado, updatedAt: new Date().toISOString() }
@@ -99,7 +133,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     ));
   };
 
-  const deleteProduto = (id: string) => {
+  const deleteProduto = (id: number) => {
     setProdutos(prev => prev.filter(produto => produto.id !== id));
   };
 
@@ -108,7 +142,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPedidos(prev => [...prev, pedido]);
   };
 
-  const updatePedido = (id: string, pedidoAtualizado: Partial<Pedido>) => {
+  const updatePedido = (id: number, pedidoAtualizado: Partial<Pedido>) => {
     setPedidos(prev => prev.map(pedido => 
       pedido.id === id 
         ? { ...pedido, ...pedidoAtualizado }
@@ -116,7 +150,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     ));
   };
 
-  const deletePedido = (id: string) => {
+  const deletePedido = (id: number) => {
     setPedidos(prev => prev.filter(pedido => pedido.id !== id));
   };
 
@@ -149,6 +183,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     pedidos,
     clientes,
     usuarios,
+    usuarioLogado,
+    isAuthenticated: !!usuarioLogado,
+    login,
+    logout,
     updateProdutos,
     updatePedidos,
     updateClientes,
