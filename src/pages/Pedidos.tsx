@@ -9,6 +9,7 @@ import { useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
+import { mockPedidos, mockClientes, mockProdutos, type Pedido, type Cliente, type Produto } from "@/lib/mock-data";
 
 // Adicionar a interface para o jsPDF com autoTable
 interface jsPDFWithAutoTable extends jsPDF {
@@ -17,15 +18,8 @@ interface jsPDFWithAutoTable extends jsPDF {
   };
 }
 
-interface ProdutoPedido {
-  id: string;
-  nome: string;
-  quantidade: number;
-  precoUnitario: number;
-  imagem?: string;
-}
-
-interface Pedido {
+// Interface para adaptar os dados do mock centralizado
+interface PedidoDisplay {
   id: string;
   numero: string;
   cliente: {
@@ -42,7 +36,13 @@ interface Pedido {
     estado: string;
     cep: string;
   };
-  produtos: ProdutoPedido[];
+  produtos: Array<{
+    id: string;
+    nome: string;
+    quantidade: number;
+    precoUnitario: number;
+    imagem?: string;
+  }>;
   status: 'pendente' | 'processando' | 'enviado' | 'entregue' | 'cancelado';
   data: string;
   valorTotal: number;
@@ -50,77 +50,49 @@ interface Pedido {
   observacoes?: string;
 }
 
-const mockPedidos: Pedido[] = [
-  {
-    id: "PED001",
-    numero: "2024-001",
-    cliente: {
-      nome: "João Silva",
-      email: "joao.silva@email.com",
-      telefone: "(11) 98765-4321"
-    },
-    endereco: {
-      rua: "Rua das Flores",
-      numero: "123",
-      complemento: "Apto 45",
-      bairro: "Centro",
-      cidade: "São Paulo",
-      estado: "SP",
-      cep: "01234-567"
-    },
-    produtos: [
-      {
-        id: "PROD001",
-        nome: "Chanel No. 5",
-        quantidade: 1,
-        precoUnitario: 750.90,
-        imagem: "https://example.com/chanel.jpg"
-      }
-    ],
-    status: "pendente",
-    data: "2024-03-15T10:30:00",
-    valorTotal: 750.90,
-    formaPagamento: "cartao",
-    observacoes: "Entregar no período da tarde"
-  },
-  {
-    id: "PED002",
-    numero: "2024-002",
-    cliente: {
-      nome: "Maria Santos",
-      email: "maria.santos@email.com",
-      telefone: "(11) 91234-5678"
-    },
-    endereco: {
-      rua: "Avenida Principal",
-      numero: "456",
-      bairro: "Jardim América",
-      cidade: "São Paulo",
-      estado: "SP",
-      cep: "04567-890"
-    },
-    produtos: [
-      {
-        id: "PROD002",
-        nome: "Dior Sauvage",
-        quantidade: 2,
-        precoUnitario: 550.00,
-        imagem: "https://example.com/dior.jpg"
+// Função para converter dados do mock centralizado para o formato de exibição
+const convertPedidosForDisplay = (): PedidoDisplay[] => {
+  return mockPedidos.map(pedido => {
+    const cliente = mockClientes.find(c => c.id === pedido.clienteId);
+    const produtosComDetalhes = pedido.produtos.map(item => {
+      const produto = mockProdutos.find(p => p.id === item.produtoId);
+      return {
+        id: item.produtoId,
+        nome: produto?.nome || 'Produto não encontrado',
+        quantidade: item.quantidade,
+        precoUnitario: item.precoUnitario,
+        imagem: produto?.imagem
+      };
+    });
+
+    // Mapear status do mock centralizado para o formato de exibição
+    const statusMapping: Record<string, PedidoDisplay['status']> = {
+      'pendente': 'pendente',
+      'aprovado': 'processando',
+      'em_preparo': 'processando',
+      'enviado': 'enviado',
+      'entregue': 'entregue',
+      'cancelado': 'cancelado'
+    };
+
+    return {
+      id: pedido.id,
+      numero: pedido.id,
+      cliente: {
+        nome: cliente?.nome || 'Cliente não encontrado',
+        email: cliente?.email || '',
+        telefone: cliente?.telefone || ''
       },
-      {
-        id: "PROD003",
-        nome: "Creed Aventus",
-        quantidade: 1,
-        precoUnitario: 1800.50,
-        imagem: "https://example.com/creed.jpg"
-      }
-    ],
-    status: "enviado",
-    data: "2024-03-14T15:45:00",
-    valorTotal: 2900.50,
-    formaPagamento: "pix"
-  }
-];
+      endereco: pedido.enderecoEntrega,
+      produtos: produtosComDetalhes,
+      status: statusMapping[pedido.status] || 'pendente',
+      data: pedido.dataPedido,
+      valorTotal: pedido.total,
+      formaPagamento: pedido.formaPagamento,
+      observacoes: pedido.observacoes
+    };
+  });
+};
 
 const statusConfig = {
   pendente: {
@@ -151,19 +123,19 @@ const statusConfig = {
 };
 
 export default function PedidosPage() {
-  const [pedidos, setPedidos] = useState<Pedido[]>(mockPedidos);
-  const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null);
+  const [pedidos, setPedidos] = useState<PedidoDisplay[]>(convertPedidosForDisplay());
+  const [selectedPedido, setSelectedPedido] = useState<PedidoDisplay | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
-  const handleViewPedido = (pedido: Pedido) => {
+  const handleViewPedido = (pedido: PedidoDisplay) => {
     setSelectedPedido(pedido);
     setOpenDialog(true);
     setOpenDropdownId(null);
   };
 
-  const handleUpdateStatus = (pedidoId: string, newStatus: Pedido['status']) => {
+  const handleUpdateStatus = (pedidoId: string, newStatus: PedidoDisplay['status']) => {
     setPedidos(pedidos.map(pedido => 
       pedido.id === pedidoId 
         ? { ...pedido, status: newStatus }

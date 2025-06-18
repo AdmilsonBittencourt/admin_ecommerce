@@ -9,16 +9,8 @@ import { useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { mockProdutos, type Produto } from "@/lib/mock-data";
 // import { Sidebar } from "@/components/sidebar"; // Sidebar import removed
-
-interface Produto {
-  id: string;
-  nome: string;
-  descricao: string;
-  preco: number;
-  estoque: number;
-  imagem?: string;
-}
 
 const produtoSchema = z.object({
   nome: z.string()
@@ -41,14 +33,6 @@ const produtoSchema = z.object({
 });
 
 type ProdutoFormData = z.infer<typeof produtoSchema>;
-
-const mockProdutos: Produto[] = [
-  { id: "PROD001", nome: "Chanel No. 5", descricao: "Perfume floral aldeídico icônico.", preco: 750.90, estoque: 50 },
-  { id: "PROD002", nome: "Dior Sauvage", descricao: "Fragrância masculina fresca e amadeirada.", preco: 550.00, estoque: 35 },
-  { id: "PROD003", nome: "Creed Aventus", descricao: "Perfume chipre frutado luxuoso.", preco: 1800.50, estoque: 20 },
-  { id: "PROD004", nome: "Yves Saint Laurent Black Opium", descricao: "Fragrância oriental baunilha viciante.", preco: 620.75, estoque: 42 },
-  { id: "PROD005", nome: "Tom Ford Oud Wood", descricao: "Perfume amadeirado exótico e raro.", preco: 1200.00, estoque: 15 },
-];
 
 export default function ProdutosPage() {
   const [produtos, setProdutos] = useState<Produto[]>(mockProdutos);
@@ -120,7 +104,8 @@ export default function ProdutosPage() {
               descricao: data.descricao,
               preco: parseFloat(data.preco),
               estoque: parseInt(data.estoque),
-              imagem: data.imagem
+              imagem: data.imagem,
+              updatedAt: new Date().toISOString()
             }
           : p
       ));
@@ -133,7 +118,11 @@ export default function ProdutosPage() {
         descricao: data.descricao,
         preco: parseFloat(data.preco),
         estoque: parseInt(data.estoque),
-        imagem: data.imagem
+        imagem: data.imagem,
+        categoria: "perfumes",
+        marca: "Marca",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       setProdutos([...produtos, produto]);
     }

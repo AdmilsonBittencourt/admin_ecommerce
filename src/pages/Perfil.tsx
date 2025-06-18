@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Camera, Loader2 } from "lucide-react";
+import { mockUsuarios } from "@/lib/mock-data";
 
 const perfilSchema = z.object({
   nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
@@ -36,8 +37,8 @@ const perfilSchema = z.object({
 
 type PerfilFormData = z.infer<typeof perfilSchema>;
 
-// Mock data - substituir por dados reais da API
-const mockAdminData = {
+// Usar dados do mock centralizado - pegando o primeiro usuário admin
+const mockAdminData = mockUsuarios.find(user => user.cargo === 'admin') || {
   nome: "Admin",
   email: "admin@universys.com",
   telefone: "(11) 99999-9999",
@@ -46,7 +47,7 @@ const mockAdminData = {
 
 export default function PerfilPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [avatar, setAvatar] = useState(mockAdminData.avatar);
+  const [avatar, setAvatar] = useState(mockAdminData.avatar || "https://github.com/shadcn.png");
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
 
   const {

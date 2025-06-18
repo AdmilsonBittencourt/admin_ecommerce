@@ -1,17 +1,29 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getDashboardStats, mockPedidos, mockClientes } from "@/lib/mock-data";
 
 export default function Dashboard() {
-    // Mock data - replace with actual API calls
-    const totalRevenue = 12500.75;
-    const perfumesSold = 342;
-    const recentOrders = [
-        { id: "ORD001", customer: "Alice Wonderland", date: "2024-07-29", total: 75.50, status: "Processing" },
-        { id: "ORD002", customer: "Bob The Builder", date: "2024-07-28", total: 120.00, status: "Shipped" },
-        { id: "ORD003", customer: "Charlie Brown", date: "2024-07-28", total: 45.99, status: "Delivered" },
-        { id: "ORD004", customer: "Diana Prince", date: "2024-07-27", total: 210.25, status: "Shipped" },
-        { id: "ORD005", customer: "Edward Scissorhands", date: "2024-07-26", total: 99.00, status: "Processing" },
-    ];
+    // Usar dados do mock centralizado
+    const stats = getDashboardStats();
+    
+    // Pegar os 5 pedidos mais recentes
+    const recentOrders = mockPedidos
+        .sort((a, b) => new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime())
+        .slice(0, 5)
+        .map(pedido => {
+            const cliente = mockClientes.find(c => c.id === pedido.clienteId);
+            return {
+                id: pedido.id,
+                customer: cliente?.nome || 'Cliente não encontrado',
+                date: new Date(pedido.dataPedido).toLocaleDateString('pt-BR'),
+                total: pedido.total,
+                status: pedido.status === 'entregue' ? 'Entregue' : 
+                       pedido.status === 'enviado' ? 'Enviado' : 
+                       pedido.status === 'aprovado' ? 'Aprovado' : 
+                       pedido.status === 'em_preparo' ? 'Em Preparo' : 
+                       pedido.status === 'pendente' ? 'Pendente' : 'Cancelado'
+            };
+        });
 
     return (
         <div className="flex flex-col gap-8 p-4 md:p-8">
@@ -39,16 +51,16 @@ export default function Dashboard() {
                         </svg>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        <div className="text-2xl font-bold">R$ {stats.totalVendas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         <p className="text-xs text-muted-foreground">
-                            +20.1% em relação ao mês passado
+                            Vendas realizadas
                         </p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
-                            Perfumes Vendidos
+                            Pedidos Pendentes
                         </CardTitle>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -64,13 +76,65 @@ export default function Dashboard() {
                         </svg>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">+{perfumesSold}</div>
+                        <div className="text-2xl font-bold">{stats.pedidosPendentes}</div>
                         <p className="text-xs text-muted-foreground">
-                            +180.1% em relação ao mês passado
+                            Aguardando processamento
                         </p>
                     </CardContent>
                 </Card>
-                {/* Add more cards for other metrics like Active Users, Sales, etc. if needed */}
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Produtos em Estoque
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4 w-4 text-muted-foreground"
+                        >
+                            <path d="M20 7h-3V6a4 4 0 0 0-8 0v1H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalProdutos}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {stats.produtosBaixoEstoque} com estoque baixo
+                        </p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                            Clientes Ativos
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4 w-4 text-muted-foreground"
+                        >
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="m22 21-2-2" />
+                            <path d="M16 16l4 4 4-4" />
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.clientesAtivos}</div>
+                        <p className="text-xs text-muted-foreground">
+                            Clientes cadastrados
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
 
             <div>
