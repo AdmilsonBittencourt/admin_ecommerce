@@ -13,14 +13,11 @@ function App() {
   return (
     <AppProvider>
       <Routes>
-        {/* Rota padrão - redireciona para login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         
-        {/* Rotas de autenticação */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/recuperar-senha" element={<RecuperarSenhaPage />} />
         
-        {/* Rotas protegidas - só acessíveis após login */}
         <Route path='/home' element={
           <ProtectedRoute>
             <Home />
@@ -29,10 +26,8 @@ function App() {
           <Route path="produtos" element={<ProdutosPage /> } />
           <Route path="pedidos" element={<PedidosPage />} />
           <Route path="perfil" element={<PerfilPage />} />
-          {/* <Route path="disciplinas" element={<Disciplinas />} /> */}
         </Route>
         
-        {/* Rota fallback - redireciona para login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AppProvider>

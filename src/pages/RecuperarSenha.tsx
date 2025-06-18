@@ -35,13 +35,10 @@ export default function RecuperarSenhaPage() {
   const onSubmit = async (data: RecuperarSenhaFormData) => {
     try {
       setIsLoading(true);
-      // Simular chamada à API
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Aqui você faria a chamada real à API
       console.log("Email para recuperação:", data.email);
       
-      // Simular envio bem-sucedido
       setEmailEnviado(true);
       toast.success("Email de recuperação enviado com sucesso!");
       
@@ -61,7 +58,6 @@ export default function RecuperarSenhaPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          {/* Logo/Brand */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-full mb-4">
               <CheckCircle className="w-8 h-8 text-white" />
@@ -70,7 +66,6 @@ export default function RecuperarSenhaPage() {
             <p className="text-gray-600">Sistema de Gerenciamento</p>
           </div>
 
-          {/* Success Card */}
           <Card className="shadow-xl border-0">
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-2xl font-bold text-center text-green-600">
@@ -113,7 +108,6 @@ export default function RecuperarSenhaPage() {
             </CardContent>
           </Card>
 
-          {/* Footer */}
           <div className="text-center mt-8">
             <p className="text-sm text-gray-500">
               © 2024 Universys. Todos os direitos reservados.
@@ -127,7 +121,6 @@ export default function RecuperarSenhaPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
             <Mail className="w-8 h-8 text-white" />
@@ -136,7 +129,6 @@ export default function RecuperarSenhaPage() {
           <p className="text-gray-600">Sistema de Gerenciamento</p>
         </div>
 
-        {/* Recuperar Senha Card */}
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl font-bold text-center">Recuperar Senha</CardTitle>
@@ -183,7 +175,6 @@ export default function RecuperarSenhaPage() {
               </Button>
             </form>
 
-            {/* Back to Login */}
             <div className="mt-6 text-center">
               <Link
                 to="/login"

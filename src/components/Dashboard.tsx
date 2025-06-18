@@ -3,11 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useAppContext } from "@/lib/context";
 
 export default function Dashboard() {
-    // Usar dados do contexto global
+    
     const { pedidos, clientes, getDashboardStats } = useAppContext();
     const stats = getDashboardStats();
     
-    // Pegar os 5 pedidos mais recentes
     const recentOrders = pedidos
         .sort((a, b) => new Date(b.dataPedido).getTime() - new Date(a.dataPedido).getTime())
         .slice(0, 5)

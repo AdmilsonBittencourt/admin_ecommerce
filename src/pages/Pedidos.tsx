@@ -12,14 +12,14 @@ import { toast } from 'react-hot-toast';
 import { useAppContext } from "@/lib/context";
 import { type Pedido } from "@/lib/mock-data";
 
-// Adicionar a interface para o jsPDF com autoTable
+
 interface jsPDFWithAutoTable extends jsPDF {
   lastAutoTable: {
     finalY: number;
   };
 }
 
-// Interface para adaptar os dados do contexto para o formato de exibição
+
 interface PedidoDisplay {
   id: number;
   numero: string;
@@ -58,7 +58,7 @@ export default function PedidosPage() {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
-  // Função para converter dados do contexto para o formato de exibição
+
   const convertPedidosForDisplay = (): PedidoDisplay[] => {
     return pedidos.map(pedido => {
       const cliente = clientes.find(c => c.id === pedido.clienteId);
@@ -73,7 +73,7 @@ export default function PedidosPage() {
         };
       });
 
-      // Mapear status do contexto para o formato de exibição
+
       const statusMapping: Record<string, PedidoDisplay['status']> = {
         'pendente': 'pendente',
         'aprovado': 'processando',
@@ -139,7 +139,7 @@ export default function PedidosPage() {
   };
 
   const handleUpdateStatus = (pedidoId: number, newStatus: PedidoDisplay['status']) => {
-    // Mapear status de exibição para status do contexto
+
     const statusMapping: Record<string, Pedido['status']> = {
       'pendente': 'pendente',
       'processando': 'aprovado',
@@ -174,7 +174,7 @@ export default function PedidosPage() {
       let startDate: Date;
       let title: string;
 
-      // Definir período do relatório
+
       switch (periodo) {
         case 'hoje':
           startDate = new Date(today.setHours(0, 0, 0, 0));
@@ -190,23 +190,23 @@ export default function PedidosPage() {
           break;
       }
 
-      // Filtrar pedidos pelo período
+
       const pedidosFiltrados = pedidosDisplay.filter(pedido => {
         const pedidoDate = new Date(pedido.data);
         return pedidoDate >= startDate && pedidoDate <= new Date();
       });
 
-      // Adicionar título
+
       doc.setFontSize(16);
       doc.text(title, 14, 15);
       doc.setFontSize(10);
       doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 22);
 
-      // Configurar tabela
+
       const tableColumn = ['Número', 'Cliente', 'Data', 'Valor Total', 'Status', 'Forma de Pagamento'];
       const tableRows: any[] = [];
 
-      // Preencher dados
+
       pedidosFiltrados.forEach(pedido => {
         const pedidoData = [
           pedido.numero,
@@ -220,7 +220,7 @@ export default function PedidosPage() {
         tableRows.push(pedidoData);
       });
 
-      // Adicionar tabela ao PDF
+
       autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
@@ -229,7 +229,7 @@ export default function PedidosPage() {
         headStyles: { fillColor: [41, 128, 185] }
       });
 
-      // Adicionar resumo
+
       const totalPedidos = pedidosFiltrados.length;
       const valorTotal = pedidosFiltrados.reduce((acc, pedido) => acc + pedido.valorTotal, 0);
       const pedidosPorStatus = pedidosFiltrados.reduce((acc, pedido) => {
@@ -249,7 +249,7 @@ export default function PedidosPage() {
         doc.text(`${statusConfig[status as keyof typeof statusConfig].label}: ${count}`, 14, doc.lastAutoTable.finalY + yOffset + 8 + (index * 8));
       });
 
-      // Salvar PDF
+
       doc.save(`relatorio-pedidos-${periodo}-${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success('Relatório gerado com sucesso!');
     } catch (error) {

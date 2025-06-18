@@ -46,7 +46,7 @@ export default function LoginPage() {
       if (result.success) {
         toast.success(result.message);
         reset();
-        // Redirecionar para a home após login bem-sucedido
+        
         navigate('/home');
       } else {
         toast.error(result.message);
@@ -62,7 +62,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo/Brand */}
+        
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
             <Lock className="w-8 h-8 text-white" />
@@ -71,7 +71,7 @@ export default function LoginPage() {
           <p className="text-gray-600">Sistema de Gerenciamento</p>
         </div>
 
-        {/* Login Card */}
+        
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>

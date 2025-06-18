@@ -10,7 +10,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated } = useAppContext();
 
   if (!isAuthenticated) {
-    // Redirecionar para login se não estiver autenticado
     return <Navigate to="/login" replace />;
   }
 

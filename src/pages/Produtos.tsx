@@ -11,7 +11,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppContext } from "@/lib/context";
 import { type Produto } from "@/lib/mock-data";
-// import { Sidebar } from "@/components/sidebar"; // Sidebar import removed
+
 
 const produtoSchema = z.object({
   nome: z.string()
@@ -96,7 +96,7 @@ export default function ProdutosPage() {
 
   const onSubmit = (data: ProdutoFormData) => {
     if (editingId) {
-      // Editar produto existente
+
       updateProduto(editingId, {
         nome: data.nome,
         descricao: data.descricao,
@@ -105,7 +105,7 @@ export default function ProdutosPage() {
         imagem: data.imagem
       });
     } else {
-      // Adicionar novo produto
+        
       const novoId = produtos.length > 0 ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
       const produto: Produto = {
         id: novoId,
@@ -134,8 +134,7 @@ export default function ProdutosPage() {
   };
 
   return (
-    // <div className="flex h-screen"> // Flex container removed
-      // <Sidebar /> // Sidebar component removed
+
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -332,6 +331,6 @@ export default function ProdutosPage() {
           </CardContent>
         </Card>
       </main>
-    // </div> // Flex container removed
+
   );
 }

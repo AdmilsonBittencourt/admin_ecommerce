@@ -36,7 +36,7 @@ const perfilSchema = z.object({
 
 type PerfilFormData = z.infer<typeof perfilSchema>;
 
-// Usar dados do mock centralizado - pegando o primeiro usuário admin
+
 const mockAdminData = mockUsuarios.find(user => user.cargo === 'admin') || {
   nome: "Admin",
   email: "admin@universys.com",
@@ -64,10 +64,9 @@ export default function PerfilPage() {
   const onSubmit = async (data: PerfilFormData) => {
     try {
       setIsLoading(true);
-      // Simular chamada à API
+    
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Aqui você faria a chamada real à API
       console.log("Dados atualizados:", data);
       
       toast.success("Perfil atualizado com sucesso!");
@@ -85,10 +84,8 @@ export default function PerfilPage() {
 
     try {
       setIsEditingAvatar(true);
-      // Simular upload da imagem
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Aqui você faria o upload real da imagem
       const reader = new FileReader();
       reader.onloadend = () => {
         setAvatar(reader.result as string);

@@ -1,4 +1,4 @@
-// Tipos de dados da aplicação
+
 export interface Produto {
   id: number;
   nome: string;
